@@ -18,13 +18,16 @@ namespace LA {
         Vector(size_t);
         Vector(double*, size_t);
         Vector(const Vector&);
+        Vector& operator=(const Vector&);
         ~Vector();
 
         void print();
         size_t length();
+        double ravel();
 
         double& operator() (size_t);
         double operator() (size_t) const;
+        Vector operator-();
         double operator*(Vector);
         Vector operator-(Vector);
         Vector operator-=(Vector);
@@ -39,7 +42,7 @@ namespace LA {
         Vector operator+=(double);
         Vector operator-=(double);
         double dot(Vector);
-
+        
         double norm(size_t n = 2);
         double sum();
     };
@@ -87,6 +90,7 @@ namespace LA {
         double norm_frobinus();
 
         Matrix T();
+        Matrix operator-();
         Matrix operator+(Matrix);
         Matrix operator-(Matrix);
         Matrix operator*(Matrix);
@@ -112,6 +116,12 @@ namespace LA {
         bool is_pd();
     };
 
+    inline Vector operator*(double d, Vector v){
+        return v * d;
+    }
+
+    Matrix transpose(Vector v);
+
     class Exception : public std::exception {
     private:
         std::string _msg;
@@ -131,6 +141,25 @@ namespace LA {
         IncompatibleArguments() : Exception("IncompatibleArguments: Incompatible arguments exception!") {}
         IncompatibleArguments(const std::string& msg) : Exception("IncompatibleArguments: " + msg) {}
     };
-
+    class IncompatibleFunction : public Exception {
+    public:
+        IncompatibleFunction() : Exception("IncompatibleFunction: Incompatible call of a function exception!") {}
+        IncompatibleFunction(const std::string& msg) : Exception("IncompatibleFunction: " + msg) {}
+    };
+    class NoValue : public Exception {
+    public:
+        NoValue() : Exception("NoValue: no value found!") {}
+        NoValue(const std::string& msg) : Exception("NoValue: " + msg) {}
+    };
+    class ValueError : public Exception {
+    public:
+        ValueError() : Exception("ValueError: value error!") {}
+        ValueError(const std::string& msg) : Exception("ValueError: " + msg) {}
+    };
+    class NotImplementedError : public Exception {
+    public:
+        NotImplementedError() : Exception("NotImplementedError: not yet implemented!") {}
+        NotImplementedError(const std::string& msg) : Exception("NotImplementedError: " + msg) {}
+    };
     
 } // namespace LA

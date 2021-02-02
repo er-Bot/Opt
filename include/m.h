@@ -18,5 +18,5 @@
 #define _swap(__a, __b)     {auto __t = __b; __b = __a; __a = __t;} 
 #define _rnd()             ((double) rand() / (RAND_MAX - 1))
 #define _rand(__a, __b)     _rnd() * (__b - __a) + __a
-
+#define _is_inf(__a)        (__a > 1e250) ? true : false 
 size_t fib(size_t n);

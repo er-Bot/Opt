@@ -21,6 +21,16 @@ namespace LA {
         memcpy(this->ptr, (&v)->ptr, len * sizeof(double));
     }
     
+    Vector& Vector::operator=(const Vector& m){
+        len = (&m)->len;
+
+        delete ptr;
+        ptr = new double[len];
+        memcpy(ptr, (&m)->ptr, len * sizeof(double));
+
+        return *this;
+    }
+
     Vector::Vector(double* list, size_t len){
         this->len = len;
         this->ptr = new double[len];
@@ -30,7 +40,8 @@ namespace LA {
     }
     
     Vector::~Vector(){
-        delete ptr;
+        if (ptr != NULL)
+            delete ptr;
     }
 
     void Vector::print(){
@@ -51,6 +62,13 @@ namespace LA {
         return len;
     }
 
+    double Vector::ravel(){
+        if(len != 1)
+            throw  IncompatibleFunction("Vector isn't of one scalar!");
+    
+        return (*this)(0);
+    }
+
     inline    
     double& Vector::operator() (size_t pos) {
         if (pos >= len)
@@ -63,6 +81,10 @@ namespace LA {
         if (pos >= len)
             throw IndexOutOfRange("Vector subscript out of bounds");
         return ptr[pos];
+    }
+
+    Vector Vector::operator-(){
+        return -1 * (*this);
     }
 
     double Vector::operator * (Vector m){
@@ -188,6 +210,10 @@ namespace LA {
         return s;
     }
 
+    Matrix transpose(Vector v){
+        return Matrix(v).T();
+    }
+
     double Vector::norm(size_t n){
         if(n <= 0)
             throw IndexOutOfRange("Norm must be greater than 1");
@@ -270,7 +296,8 @@ namespace LA {
     }
     
     Matrix::~Matrix(){
-        delete ptr;
+        if(ptr != NULL)
+            delete ptr;
     }
 
     void Matrix::random(double min, double max, bool sym){
@@ -589,6 +616,10 @@ namespace LA {
         return at;
     }
 
+    Matrix Matrix::operator-(){
+        return (*this) * -1;
+    }
+
     Matrix Matrix::operator + (Matrix m){
         if(m.rows() != row || m.cols() != col){
             printf("Cannot add matrices of different dimensions!\n");
@@ -777,7 +808,6 @@ namespace LA {
             return true;
         return false;
     }
-
 
     bool Matrix::is_symmetric(){
         if(!is_square()) 
