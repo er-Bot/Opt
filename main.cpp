@@ -5,7 +5,11 @@
 LA::Matrix a;
 LA::Vector b;
 double quad(Vector x) {
-    return (transpose(x) * a * x + transpose(x) * b).ravel();
+    return (transpose(x) * a * x - transpose(x) * b).ravel();
+}
+
+double non_quad(Vector x){
+    return exp(x(0) + 3 * x(1) -.1) + exp(x(0) - 3*x(1) -.1) + exp(-x(0)-.1);
 }
 
 double rosenbrock(Vector x){
@@ -96,18 +100,17 @@ void test_GD(){
         double av[] = {1,0,0,1};
         a = Matrix(2);
         a.from_list(av, 4);
-        double bv[] = {0,0};
+        double bv[] = {1,2};
         b = Vector(bv, 2);
 
         double xv[] = {2,3};
         LA::Vector x = LA::Vector(xv, 2);
 
         RA::Function f = RA::Function(2);
-        f.set_func(brent);
+        f.set_func(non_quad);
 
         NLO::Line_Search ls = NLO::Line_Search(f);
-        ls.lipschitz(1e-16, .95);
-
+        ls.wolfe(.5, .8, .95);
         NLO::GD_Optimizer opt = NLO::GD_Optimizer(f, ls);
         opt.set_iterations(1000);
         Vector xo = opt.optimize(x, 1e-6);
@@ -126,5 +129,5 @@ void test_GD(){
 
 
 int main(){
-    test_FR();
+    test_GD();
 }

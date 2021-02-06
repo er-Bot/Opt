@@ -24,7 +24,8 @@ namespace NLO {
             Armijo,
             Wolfe,
             Strong_Wolfe,
-            Lipschitz
+            Lipschitz,
+            Fibonacci
         } Algorithm;
 
         void constant(double alpha);
@@ -33,6 +34,7 @@ namespace NLO {
         void wolfe(double c1, double c2, double rho);
         void strong_wolfe(double c1, double c2, double rho);
         void lipschitz(double eps, double rho);
+        void fibonacci(double lb, double ub, double precision);
 
         Algorithm type(){return _type;}
 
@@ -50,55 +52,9 @@ namespace NLO {
         inline static double get_wolfe(Function f, Vector x, Vector p, double c1 = .25, double c2 = .75, double rho=0.95); 
         inline static double get_strong_wolfe(Function f, Vector x, Vector p, double c1 = .25, double c2 = .75, double rho=0.95); 
         inline static double get_lipschitz(Function f, Vector x, Vector p, double eps, double rho);
+        inline static double get_fibonacci(Function f, Vector x, Vector p, double lb, double ub, double prec);
     };
     
-    /*** Step Size searches  ***/
-    
-    class Constant_Step_Size {
-    private:
-        double a;
-    public:
-        Constant_Step_Size(){}
-        Constant_Step_Size(double _a) : a(_a){}
-        ~Constant_Step_Size(){}
-
-        double get();
-    };
-    
-    class Wolfe_Step_Size {
-    // https://sites.math.washington.edu/~burke/crs/408/notes/nlp/line.pdf
-    private:
-        double step;
-        double beta_1;
-        double beta_2;
-        double rho;
-        Function f;
-        Vector x;
-        Vector p;
-    public:
-        Wolfe_Step_Size(Function _f, Vector _x, Vector _p, double b1, double b2, double r) : f(_f), x(_x), p(_p), beta_1(b1), beta_2(b2), rho(r) {}
-        ~Wolfe_Step_Size(){}
-
-        double get();
-    };
-    
-    class Armijo_Step_Size {
-    private:
-        double step;
-        double beta;
-        double rho;
-        Function f;
-        Vector x;
-        Vector p;
-    public:
-        Armijo_Step_Size(){}
-        Armijo_Step_Size(Function _f, Vector _x, Vector _p, double b, double r) : f(_f), x(_x), p(_p), beta(b), rho(r) {}
-        ~Armijo_Step_Size(){}
-
-        double get();
-    };
-
-
     /***  Non Linear Optimizers  ***/
     class Optimizer{
     protected:

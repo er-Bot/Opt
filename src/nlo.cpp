@@ -39,6 +39,13 @@ namespace NLO {
         _type = Lipschitz;
     }
 
+    void Line_Search::fibonacci(double lb, double ub, double precision){
+        c1 = lb;
+        c2 = ub;
+        rho = precision;
+        _type = Fibonacci;
+    }
+
     double Line_Search::get(){
         if(_type != Constant)
             throw NotImplementedError("The used line search isn't of type constant!");
@@ -58,9 +65,11 @@ namespace NLO {
         case Wolfe:
             return get_wolfe(f, x, p, c1, c2, rho);
         case Strong_Wolfe:
-            return get_wolfe(f, x, p, c1, c2, rho);
+            return get_strong_wolfe(f, x, p, c1, c2, rho);
         case Lipschitz:
             return get_lipschitz(f, x, p, c1, rho);
+        case Fibonacci:
+            return get_fibonacci(f, x, p, c1, c2, rho);
         default:
             throw NotImplementedError("Try to specify what step size line search by setting it's hyperparameters!");
         }
@@ -101,9 +110,11 @@ namespace NLO {
         double alpha = 1;
         while (true){
             if(f(x + alpha * p) > f(x) + c1 * alpha * (g * p)){
+                std::cout << "-";
                 ub = alpha;
                 alpha = .5 * (lb + ub);
             } else if(p * f.grad(x + alpha * p) < c2 * p * g){
+                std::cout << "+";
                 lb = alpha;
                 if (_is_inf(ub))    alpha = 2 * lb;
                 else                alpha = .5 * (lb + ub);
@@ -159,6 +170,27 @@ namespace NLO {
         return alpha;
     }
 
+    double Line_Search::get_fibonacci(Function f, Vector x, Vector p, double lb, double ub, double prec){
+        size_t n = 1;
+        
+        while ((1 / (double)fib(n)) > prec) n++;
+        n++;
+
+        for(size_t k = 0; k < n; k++){
+            double alpha = fib(n - k - 1) / (double)fib(n - k);
+            
+            double ak = lb + (1 - alpha) * (ub - lb);
+            double bk = lb + alpha * (ub - lb);
+            
+            if(f(x + ak * p) < f(x + bk * p))   ub = bk;
+            else                lb = ak;
+        }
+        if (.5 * (lb + ub) < 1e-16) throw ValueError("Step size too small!");
+        
+        return .5 * (lb + ub);
+    }
+
+
 
 
     void Optimizer::set_iterations(size_t n){
@@ -185,10 +217,11 @@ namespace NLO {
 
             if (step.type() == Line_Search::Constant)
                 alpha = step.get();
+            else if (step.type() == Line_Search::Scaled_Constant)
+                alpha = step.get(d);
             else
                 alpha = step.get(x, d);
                 
-
             printf("Iter %lu : grad_norm %.15f : step size %.18f\n", iter, g.norm(), alpha);
             f.grad(x).print();
 
